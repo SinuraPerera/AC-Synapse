@@ -3,9 +3,10 @@
 **Ananda College's digital event command center.**
 Real-time event updates, an interactive calendar, student ticketing with QR passes, live championship standings, and multilingual support, all in one platform.<br>
 
-<div style="display: flex; justify-content: center; align-items: center; padding: 20px;">
-  <img src="logo.png" alt="Logo" style="max-width: 200px; height: auto;">
-</div><br>
+<div style="display: flex; justify-content: center; align-items: center; padding: 15px;">
+    <img src="logo.png" alt="Logo" style="max-width: 30px; height: auto;">
+</div>
+<br>
 
 
 > Built for **BTUI'26** - the Annual ICT day of Royal College, Colombo).
