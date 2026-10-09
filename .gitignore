@@ -1,0 +1,16 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+dev-dist/
+battleofthemaroons.png
+debate.png
+logo.png
+parentsmeeting.png
+photographicexhibition.png
+scienceexhibition.png
+sportsmeet.png

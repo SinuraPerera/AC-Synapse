@@ -1,0 +1,321 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Reusable Hardened Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isBootstrapOwner() {
+      return isSignedIn() &&
+        request.auth.token.email == '1geekwiths@gmail.com' &&
+        request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        isBootstrapOwner()
+      );
+    }
+
+    // 3. Entity Validation Blueprints
+    function isValidEvent(data) {
+      return data.keys().hasAll([
+          'id', 'title', 'subtitle', 'category', 'description',
+          'venue', 'startDate', 'endDate', 'totalSeats',
+          'registeredCount', 'organizer', 'imageUrl'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'title', 'subtitle', 'category', 'description',
+          'venue', 'startDate', 'endDate', 'totalSeats',
+          'registeredCount', 'organizer', 'imageUrl', 'featured', 'schedule'
+        ]) &&
+        isValidId(data.id) &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+        data.subtitle is string && data.subtitle.size() <= 300 &&
+        data.category is string && data.category.size() <= 64 &&
+        data.category in ['Sports', 'Debate', 'Exhibition', 'Academic', 'Cultural', "Parents' Meeting"] &&
+        data.description is string && data.description.size() <= 3000 &&
+        data.venue is string && data.venue.size() >= 1 && data.venue.size() <= 200 &&
+        data.startDate is string && data.startDate.size() <= 64 &&
+        data.endDate is string && data.endDate.size() <= 64 &&
+        data.totalSeats is int && data.totalSeats >= 1 && data.totalSeats <= 10000 &&
+        data.registeredCount is int && data.registeredCount >= 0 && data.registeredCount <= data.totalSeats &&
+        data.organizer is string && data.organizer.size() <= 200 &&
+        data.imageUrl is string && data.imageUrl.size() <= 1000 &&
+        (!('featured' in data) || data.featured is bool) &&
+        (!('schedule' in data) || (data.schedule is list && data.schedule.size() <= 25));
+    }
+
+    function isValidAnnouncement(data) {
+      return data.keys().hasAll([
+          'id', 'title', 'body', 'category', 'createdAt', 'author', 'isUrgent', 'isPinned'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'title', 'body', 'category', 'createdAt', 'author', 'isUrgent', 'isPinned', 'relatedEventId'
+        ]) &&
+        isValidId(data.id) &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 240 &&
+        data.body is string && data.body.size() >= 1 && data.body.size() <= 3000 &&
+        data.category is string && data.category.size() <= 64 &&
+        data.createdAt is string && data.createdAt.size() <= 64 &&
+        data.author is string && data.author.size() <= 160 &&
+        data.isUrgent is bool &&
+        data.isPinned is bool &&
+        (!('relatedEventId' in data) || (data.relatedEventId is string && data.relatedEventId.size() <= 128));
+    }
+
+    function isValidLiveUpdate(data) {
+      return data.keys().hasAll([
+          'id', 'eventId', 'eventTitle', 'type', 'headline', 'detail', 'timestamp', 'venue'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'eventId', 'eventTitle', 'type', 'headline', 'detail',
+          'scoreSummary', 'timestamp', 'venue', 'isHappeningNow'
+        ]) &&
+        isValidId(data.id) &&
+        isValidId(data.eventId) &&
+        data.eventTitle is string && data.eventTitle.size() <= 200 &&
+        data.type is string && data.type.size() <= 32 &&
+        data.type in ['score', 'schedule', 'highlight', 'alert', 'notice'] &&
+        data.headline is string && data.headline.size() >= 1 && data.headline.size() <= 240 &&
+        data.detail is string && data.detail.size() >= 1 && data.detail.size() <= 2000 &&
+        data.timestamp is string && data.timestamp.size() <= 64 &&
+        data.venue is string && data.venue.size() <= 200 &&
+        (!('scoreSummary' in data) || (data.scoreSummary is string && data.scoreSummary.size() <= 240)) &&
+        (!('isHappeningNow' in data) || data.isHappeningNow is bool);
+    }
+
+    function isValidRegistration(data) {
+      return data.keys().hasAll([
+          'id', 'userId', 'ticketCode', 'eventId', 'attendeeName',
+          'attendeeRole', 'gradeOrRoleDetail', 'email', 'phone',
+          'registeredAt', 'seatSection', 'status', 'checkedIn'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'userId', 'ticketCode', 'eventId', 'attendeeName',
+          'attendeeRole', 'gradeOrRoleDetail', 'email', 'phone',
+          'houseName', 'registeredAt', 'seatSection', 'status',
+          'checkedIn', 'checkedInAt'
+        ]) &&
+        isValidId(data.id) &&
+        isValidId(data.userId) &&
+        data.ticketCode is string && data.ticketCode.size() == 13 &&
+        data.ticketCode.matches('^RCP-[A-Z0-9]{4}-[A-Z0-9]{4}$') &&
+        isValidId(data.eventId) &&
+        data.attendeeName is string && data.attendeeName.size() >= 2 && data.attendeeName.size() <= 160 &&
+        data.attendeeRole is string && data.attendeeRole.size() <= 32 &&
+        data.attendeeRole in ['Student', 'Parent', 'Teacher'] &&
+        data.gradeOrRoleDetail is string && data.gradeOrRoleDetail.size() >= 2 && data.gradeOrRoleDetail.size() <= 160 &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+        data.phone is string && data.phone.size() >= 7 && data.phone.size() <= 32 &&
+        (!('houseName' in data) || (data.houseName is string && data.houseName in ['Vijaya', 'Gemunu', 'Parakrama', 'Thissa'])) &&
+        data.registeredAt is string && data.registeredAt.size() <= 64 &&
+        data.seatSection is string && data.seatSection.size() <= 160 &&
+        data.status is string && data.status in ['Confirmed', 'Waitlisted'] &&
+        data.checkedIn is bool &&
+        (!('checkedInAt' in data) || (data.checkedInAt is string && data.checkedInAt.size() <= 64));
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'role', 'isAdmin', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'isAdmin', 'gradeOrDepartment', 'createdAt']) &&
+        isValidId(data.uid) &&
+        data.email is string && data.email.size() <= 200 &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 160 &&
+        data.role is string && data.role in ['student', 'parent', 'teacher', 'admin'] &&
+        data.isAdmin is bool &&
+        (!('gradeOrDepartment' in data) || (data.gradeOrDepartment is string && data.gradeOrDepartment.size() <= 160)) &&
+        data.createdAt is string && data.createdAt.size() <= 64;
+    }
+
+    function isValidAdminRecord(data) {
+      return data.keys().hasAll(['uid', 'email', 'grantedAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'grantedAt']) &&
+        isValidId(data.uid) &&
+        data.email is string && data.email.size() <= 200 &&
+        data.grantedAt is string && data.grantedAt.size() <= 64;
+    }
+
+    // 4. Collection Rules
+    // /events/{eventId}: Anyone can read; only admins can write (plus initial empty seed & atomic seat count adjustment during registration)
+    match /events/{eventId} {
+      allow get: if isValidId(eventId);
+      allow list: if true;
+
+      allow create: if isValidId(eventId) &&
+        incoming().id == eventId &&
+        isValidEvent(incoming()) &&
+        (isAdmin() || !exists(/databases/$(database)/documents/events/evt-interhouse-athletics));
+
+      allow update: if isSignedIn() &&
+        isValidId(eventId) &&
+        isValidEvent(incoming()) &&
+        incoming().id == existing().id && (
+          isAdmin() ||
+          (
+            incoming().diff(existing()).affectedKeys().hasOnly(['registeredCount']) &&
+            (
+              incoming().registeredCount == existing().registeredCount + 1 ||
+              incoming().registeredCount == existing().registeredCount - 1
+            )
+          )
+        );
+
+      allow delete: if isSignedIn() && isValidId(eventId) && isAdmin();
+    }
+
+    // /announcements/{announcementId}: Anyone can read; only admins can write (or initial empty seed)
+    match /announcements/{announcementId} {
+      allow get: if isValidId(announcementId);
+      allow list: if true;
+
+      allow create: if isValidId(announcementId) &&
+        incoming().id == announcementId &&
+        isValidAnnouncement(incoming()) &&
+        (isAdmin() || !exists(/databases/$(database)/documents/announcements/ann-1));
+
+      allow update: if isSignedIn() &&
+        isValidId(announcementId) &&
+        isValidAnnouncement(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().createdAt == existing().createdAt &&
+        isAdmin();
+
+      allow delete: if isSignedIn() && isValidId(announcementId) && isAdmin();
+    }
+
+    // /liveUpdates/{updateId}: Anyone can read; only admins can write (or initial empty seed)
+    match /liveUpdates/{updateId} {
+      allow get: if isValidId(updateId);
+      allow list: if true;
+
+      allow create: if isValidId(updateId) &&
+        incoming().id == updateId &&
+        isValidLiveUpdate(incoming()) &&
+        (isAdmin() || !exists(/databases/$(database)/documents/liveUpdates/lu-1));
+
+      allow update: if isSignedIn() &&
+        isValidId(updateId) &&
+        isValidLiveUpdate(incoming()) &&
+        incoming().id == existing().id &&
+        isAdmin();
+
+      allow delete: if isSignedIn() && isValidId(updateId) && isAdmin();
+    }
+
+    // /registrations/{registrationId}: Users can only read/create/delete their own registrations; admins can read/update all
+    match /registrations/{registrationId} {
+      allow get: if isSignedIn() &&
+        isValidId(registrationId) &&
+        (existing().userId == request.auth.uid || isAdmin());
+
+      allow list: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+
+      allow create: if isSignedIn() &&
+        isValidId(registrationId) &&
+        incoming().id == registrationId &&
+        isValidRegistration(incoming()) &&
+        incoming().userId == request.auth.uid &&
+        incoming().checkedIn == false &&
+        exists(/databases/$(database)/documents/events/$(incoming().eventId));
+
+      allow update: if isSignedIn() &&
+        isValidId(registrationId) &&
+        isValidRegistration(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().userId == existing().userId &&
+        incoming().eventId == existing().eventId &&
+        incoming().ticketCode == existing().ticketCode && (
+          isAdmin() ||
+          (
+            existing().status == 'Waitlisted' &&
+            incoming().status == 'Confirmed' &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+          )
+        );
+
+      allow delete: if isSignedIn() &&
+        isValidId(registrationId) &&
+        (existing().userId == request.auth.uid || isAdmin());
+    }
+
+    // /users/{userId}: PII isolated to owner or admin
+    match /users/{userId} {
+      allow get: if isSignedIn() &&
+        isValidId(userId) &&
+        (request.auth.uid == userId || isAdmin());
+
+      allow list: if isSignedIn() &&
+        (resource.data.uid == request.auth.uid || isAdmin());
+
+      allow create: if isSignedIn() &&
+        isValidId(userId) &&
+        request.auth.uid == userId &&
+        incoming().uid == userId &&
+        isValidUserProfile(incoming()) &&
+        (
+          incoming().isAdmin == false ||
+          isAdmin() ||
+          (request.auth.token.email == 'admin@anandacollege.edu.lk' && incoming().email == request.auth.token.email)
+        );
+
+      allow update: if isSignedIn() &&
+        isValidId(userId) &&
+        isValidUserProfile(incoming()) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt && (
+          isAdmin() ||
+          (
+            request.auth.uid == userId &&
+            incoming().isAdmin == existing().isAdmin &&
+            incoming().role == existing().role &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'gradeOrDepartment'])
+          )
+        );
+
+      allow delete: if isSignedIn() && isValidId(userId) && isAdmin();
+    }
+
+    // /admins/{adminId}: Trusted admin registry
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && (request.auth.uid == adminId || isAdmin());
+      allow list: if isSignedIn() && isAdmin();
+
+      allow create: if isSignedIn() &&
+        isValidId(adminId) &&
+        incoming().uid == adminId &&
+        isValidAdminRecord(incoming()) &&
+        (
+          isAdmin() ||
+          (
+            request.auth.uid == adminId &&
+            request.auth.token.email == 'admin@anandacollege.edu.lk' &&
+            incoming().email == request.auth.token.email
+          )
+        );
+
+      allow update, delete: if isSignedIn() && isValidId(adminId) && isAdmin();
+    }
+  }
+}

@@ -1,0 +1,361 @@
+{
+  "entities": {
+    "Event": {
+      "title": "Event",
+      "description": "A school event at Ananda College, Colombo.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "category": {
+          "type": "string",
+          "enum": ["Sports", "Debate", "Exhibition", "Academic", "Cultural", "Parents' Meeting"]
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 3000
+        },
+        "venue": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "startDate": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "endDate": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "totalSeats": {
+          "type": "integer"
+        },
+        "registeredCount": {
+          "type": "integer"
+        },
+        "organizer": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "imageUrl": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "featured": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "subtitle",
+        "category",
+        "description",
+        "venue",
+        "startDate",
+        "endDate",
+        "totalSeats",
+        "registeredCount",
+        "organizer",
+        "imageUrl"
+      ]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Official school announcement or notice.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "category": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "isUrgent": {
+          "type": "boolean"
+        },
+        "isPinned": {
+          "type": "boolean"
+        },
+        "relatedEventId": {
+          "type": "string",
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "category",
+        "createdAt",
+        "author",
+        "isUrgent",
+        "isPinned"
+      ]
+    },
+    "Registration": {
+      "title": "Registration",
+      "description": "Event ticket registration record associated with a user.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ticketCode": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^RCP-[A-Z0-9]{4}-[A-Z0-9]{4}$"
+        },
+        "eventId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "attendeeName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "attendeeRole": {
+          "type": "string",
+          "enum": ["Student", "Parent", "Teacher"]
+        },
+        "gradeOrRoleDetail": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "houseName": {
+          "type": "string",
+          "enum": ["Vijaya", "Gemunu", "Parakrama", "Thissa"]
+        },
+        "registeredAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "seatSection": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Confirmed", "Waitlisted"]
+        },
+        "checkedIn": {
+          "type": "boolean"
+        },
+        "checkedInAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "ticketCode",
+        "eventId",
+        "attendeeName",
+        "attendeeRole",
+        "gradeOrRoleDetail",
+        "email",
+        "phone",
+        "registeredAt",
+        "seatSection",
+        "status",
+        "checkedIn"
+      ]
+    },
+    "LiveUpdate": {
+      "title": "LiveUpdate",
+      "description": "Real-time venue score, schedule change, highlight, or alert.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "eventId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "eventTitle": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "type": {
+          "type": "string",
+          "enum": ["score", "schedule", "highlight", "alert", "notice"]
+        },
+        "headline": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "scoreSummary": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "timestamp": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "venue": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "isHappeningNow": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "eventId",
+        "eventTitle",
+        "type",
+        "headline",
+        "detail",
+        "timestamp",
+        "venue"
+      ]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user profile storing display metadata and admin flag.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "role": {
+          "type": "string",
+          "enum": ["student", "parent", "teacher", "admin"]
+        },
+        "isAdmin": {
+          "type": "boolean"
+        },
+        "gradeOrDepartment": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["uid", "email", "displayName", "role", "isAdmin", "createdAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Trusted admin lookup document keyed by user UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "grantedAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["uid", "email", "grantedAt"]
+    }
+  },
+  "firestore": {
+    "/events/{eventId}": {
+      "schema": { "$ref": "#/entities/Event" },
+      "description": "Publicly readable school events; writable by admins and seat-count updatable during registration transactions."
+    },
+    "/announcements/{announcementId}": {
+      "schema": { "$ref": "#/entities/Announcement" },
+      "description": "Publicly readable school announcements; writable only by admins."
+    },
+    "/registrations/{registrationId}": {
+      "schema": { "$ref": "#/entities/Registration" },
+      "description": "Event ticket registrations; users can read/create/delete their own registrations; admins can read/update all."
+    },
+    "/liveUpdates/{updateId}": {
+      "schema": { "$ref": "#/entities/LiveUpdate" },
+      "description": "Publicly readable live venue updates; writable only by admins."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user profiles readable by the owner or an admin."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Trusted admin registry."
+    }
+  }
+}

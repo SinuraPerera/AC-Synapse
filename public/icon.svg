@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="maroonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8E152B" />
+      <stop offset="50%" stop-color="#7A1224" />
+      <stop offset="100%" stop-color="#4A0914" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#maroonGrad)" />
+  <rect x="28" y="28" width="456" height="456" rx="92" fill="none" stroke="url(#goldGrad)" stroke-width="8" stroke-opacity="0.65" />
+  <circle cx="256" cy="148" r="32" fill="none" stroke="url(#goldGrad)" stroke-width="7" />
+  <circle cx="256" cy="148" r="10" fill="url(#goldGrad)" />
+  <line x1="256" y1="104" x2="256" y2="116" stroke="url(#goldGrad)" stroke-width="6" stroke-linecap="round" />
+  <line x1="256" y1="180" x2="256" y2="192" stroke="url(#goldGrad)" stroke-width="6" stroke-linecap="round" />
+  <line x1="212" y1="148" x2="224" y2="148" stroke="url(#goldGrad)" stroke-width="6" stroke-linecap="round" />
+  <line x1="288" y1="148" x2="300" y2="148" stroke="url(#goldGrad)" stroke-width="6" stroke-linecap="round" />
+  <text x="256" y="330" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="168" fill="url(#goldGrad)" letter-spacing="-4">AC</text>
+  <text x="256" y="405" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="40" fill="#FDE68A" letter-spacing="10">SYNAPSE</text>
+</svg>
